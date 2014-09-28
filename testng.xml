@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="DolphinTests" parallel="tests" thread-count="10" >
+	<test verbose="5" name="Test1" annotations="JDK" parallel="classes" thread-count="6" >
+		<groups>
+			<run>
+		 		<exclude name="excluded" />
+      		</run> 
+		</groups>
+		<classes>
+			<class name="tests.Test1"></class>
+			<class name="tests.Test2"></class>
+		</classes>
+	</test>
+	<test verbose="5" name="Test2" annotations="JDK" parallel="classes" thread-count="6" >
+		<groups>
+			<run>
+		 		<exclude name="excluded" />
+      		</run> 
+		</groups>
+		<classes>
+			<class name="tests.Test1"></class>
+			<class name="tests.Test2"></class>
+		</classes>
+	</test>
+	<listeners>
+		<listener class-name="com.yahoo.basava.testng.reporters.ProgressReporter" />
+		<!-- <listener class-name="org.testng.reporters.EmailableReporter2" /> -->
+		<listener class-name="org.testng.reporters.EmailableReporter" />
+	</listeners> 
+</suite>

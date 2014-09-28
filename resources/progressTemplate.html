@@ -1,0 +1,87 @@
+<html>
+    <head>
+        <title>TestNG:  Tests Progress...</title>
+        <style type="text/css">table caption,table.info_table,table.param,table.passed,table.failed {margin-bottom:10px;border:1px solid #000099;border-collapse:collapse;empty-cells:show;}table.info_table td,table.info_table th,table.param td,table.param th,table.passed td,table.passed th,table.failed td,table.failed th {border:1px solid #000099;padding:.25em .5em .25em .5em}table.param th {vertical-align:bottom}td.numi,th.numi,td.numi_attn {text-align:right}tr.total td {font-weight:bold}table caption {text-align:center;font-weight:bold;}table.passed tr.stripe td,table tr.passedodd td {background-color: #00AA00;}table.passed td,table tr.passedeven td {background-color: #33FF33;}table.passed tr.stripe td,table tr.skippedodd td {background-color: #cccccc;}table.passed td,table tr.skippedodd td {background-color: #dddddd;}table.failed tr.stripe td,table tr.failedodd td,table.param td.numi_attn {background-color: #FF3333;}table.failed td,table tr.failedeven td,table.param tr.stripe td.numi_attn {background-color: #DD0000;}tr.stripe td,tr.stripe th {background-color: #E6EBF9;}p.totop {font-size:85%;text-align:center;border-bottom:2px black solid}div.shootout {padding:2em;border:3px #4854A8 solid} body {background-color:lightpurple}</style>
+        <link rel="stylesheet" type="text/css" href="chrome-extension://lfjamigppmepikjlacjdpgjaiojdjhoj/css/menu.css">
+    </head>
+    <body>
+    	<h1>Test Progress page </h1>
+    	<table border="2" cellspacing="0" cellpadding="2" class="param" width="50%">
+    		<tbody>
+    		<tr> 
+    			<th bgcolor="#b39ddb" colspan="1">Progressing test cases Count : $progressingTestMethods.size() </th>
+    		</tr>
+    		<tr bgcolor="#d1c4e9">
+    			<th>Progressing Test Cases...</th>
+    		</tr>
+    		#foreach( $pro in $progressingTestMethods )
+    		<tr>
+    			<td>$pro</td>
+    		</tr>
+    		#end
+    		</tbody>
+    	</table>
+		<table border="2" cellspacing="0" cellpadding="2" class="param" width="50%">
+    		<tbody>
+    		<tr> 
+    			<th bgcolor="#b0bec5" colspan="1">Pending test cases Count : $testsPending.size() </th>
+    		</tr>
+    		<tr bgcolor="#cfd8dc">
+    			<th>Pending Test Cases</th>
+    		</tr>
+    		#foreach( $pending in $testsPending )
+    		<tr>
+    			<td>$pending</td>
+    		</tr>
+    		#end
+    		</tbody>
+    	</table>    	
+    	<table border="2" cellspacing="0" cellpadding="2" class="param" width="100%">
+    		<tbody>
+    		<tr> 
+    			<th bgcolor="#e51c23" colspan="2">Failed test cases Count : $allFailedTestMethods.size(), FBCount : $allFailed.size() </th>
+    		</tr>
+    		<tr bgcolor="#e84e40">
+	    		<th>Fail Reason</th>
+    			<th>Fail Cases</th>
+    		</tr>
+    		#foreach( $reason in $allFailed.keySet() )
+    		<tr>
+    			<td>$reason</td>
+    			<td>$allFailed.get($reason)<br></td>
+    		</tr>
+    		#end
+    		</tbody>
+    	</table>
+    	<table border="2" cellspacing="0" cellpadding="2" class="param" width="50%">
+    		<tbody>
+    		<tr> 
+    			<th bgcolor="#757575" colspan="1">Skipped test cases Count : $allSkippedTestMethods.size() </th>
+    		</tr>
+    		<tr bgcolor="#9e9e9e">
+    			<th>Skipped Test Cases</th>
+    		</tr>
+    		#foreach( $skip in $allSkippedTestMethods )
+    		<tr>
+    			<td>$skip</td>
+    		</tr>
+    		#end
+    		</tbody>
+    	</table>
+    	<table border="2" cellspacing="0" cellpadding="2" class="param" width="50%">
+    		<tbody>
+    		<tr> 
+    			<th bgcolor="#2baf2b" colspan="1">Passed test cases Count : $allPassedTestMethods.size() </th>
+    		</tr>
+    		<tr bgcolor="#42bd41">
+    			<th>Passed Test Cases</th>
+    		</tr>
+    		#foreach( $pass in $allPassedTestMethods )
+    		<tr>
+    			<td>$pass</td>
+    		</tr>
+    		#end
+    		</tbody>
+    	</table>
+    </body>
+</html>
