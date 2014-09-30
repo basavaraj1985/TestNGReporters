@@ -1,4 +1,4 @@
-package com.yahoo.basava.testng.reporters;
+package com.basava.testng.reporters;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,14 +22,14 @@ import org.testng.ITestResult;
 
 public class ProgressReporter implements ITestListener
 {
-	private String templateFile = "resources/progressTemplate.html";
-	public static final String PROGRESS_REPORT_FILE = "test-output/ProgressReport.html";
-	public static final String PROGRESS_TEMPLATE_FILE_WRITE_TO = "test-output/progressTemplate.html";
+	private String templateFile = "resources/progressTemplate1.html";
+	public static final String PROGRESS_REPORT_FILE = "Reports/ProgressReport.html";
+	public static final String PROGRESS_TEMPLATE_FILE_WRITE_TO = "Reports/progressTemplate.html";
 
 	private Object lock = new Object();
-	private List<String> testsInProgress = new ArrayList<>();
-	private List<String> testsPending = new ArrayList<>();
-	private List<String> testsCompleted = new ArrayList<>();
+	private List<String> testsInProgress = new ArrayList<String>();
+	private List<String> testsPending = new ArrayList<String>();
+	private List<String> testsCompleted = new ArrayList<String>();
 	private List<String> allFailedTestMethods = new ArrayList<String>();
 	private List<String> allPassedTestMethods = new ArrayList<String>();
 	private List<String> allSkippedTestMethods = new ArrayList<String>();
@@ -42,8 +42,10 @@ public class ProgressReporter implements ITestListener
 		     "<title>" + pageTitle + "</title>" +
 		        "<style type=\"text/css\">table caption,table.info_table,table.param,table.passed,table.failed {margin-bottom:10px;border:1px solid #000099;border-collapse:collapse;empty-cells:show;}table.info_table td,table.info_table th,table.param td,table.param th,table.passed td,table.passed th,table.failed td,table.failed th {border:1px solid #000099;padding:.25em .5em .25em .5em}table.param th {vertical-align:bottom}td.numi,th.numi,td.numi_attn {text-align:right}tr.total td {font-weight:bold}table caption {text-align:center;font-weight:bold;}table.passed tr.stripe td,table tr.passedodd td {background-color: #00AA00;}table.passed td,table tr.passedeven td {background-color: #33FF33;}table.passed tr.stripe td,table tr.skippedodd td {background-color: #cccccc;}table.passed td,table tr.skippedodd td {background-color: #dddddd;}table.failed tr.stripe td,table tr.failedodd td,table.param td.numi_attn {background-color: #FF3333;}table.failed td,table tr.failedeven td,table.param tr.stripe td.numi_attn {background-color: #DD0000;}tr.stripe td,tr.stripe th {background-color: #E6EBF9;}p.totop {font-size:85%;text-align:center;border-bottom:2px black solid}div.shootout {padding:2em;border:3px #4854A8 solid} body {background-color:lightpurple}</style>" +
 		        "<link rel=\"stylesheet\" type=\"text/css\" href=\"chrome-extension://lfjamigppmepikjlacjdpgjaiojdjhoj/css/menu.css\">" +
+		        "<meta http-equiv=\"refresh\" content=\"3\" >" +
 		    "</head>" ; 
 	String progressTable = 
+			"#if ($progressingTestMethods.size() > 0 )" +
 			"<table border=\"2\" cellspacing=\"0\" cellpadding=\"2\" class=\"param\" width=\"50%\">" +
     		"<tbody>" +
     		"<tr> " +
@@ -58,8 +60,11 @@ public class ProgressReporter implements ITestListener
     		"</tr>" +
     		"#end" +
     		"</tbody>" +
-    	"</table>" ;
-	String pendingTable = "<table border=\"2\" cellspacing=\"0\" cellpadding=\"2\" class=\"param\" width=\"50%\">" +
+    		"</table>" +
+    		"#end";
+	String pendingTable =
+			"#if ($testsPending.size() > 0 )"+
+			"<table border=\"2\" cellspacing=\"0\" cellpadding=\"2\" class=\"param\" width=\"50%\">" +
     		"<tbody>" +
     		"<tr> " +
     			"<th bgcolor=\"#b0bec5\" colspan=\"1\">Pending test cases Count : $testsPending.size() </th>" +
@@ -73,8 +78,11 @@ public class ProgressReporter implements ITestListener
     		"</tr>" +
     		"#end" +
     		"</tbody>" +
-    	"</table>" ;
-	String failedTable = "<table border=\"2\" cellspacing=\"0\" cellpadding=\"2\" class=\"param\" width=\"100%\">" +
+    		"</table>"  + 
+    		"#end";
+	String failedTable = 
+			"#if ( $allFailed.size() > 0 )" +
+			"<table border=\"2\" cellspacing=\"0\" cellpadding=\"2\" class=\"param\" width=\"100%\">" +
     		"<tbody>" +
     		"<tr> " +
     			"<th bgcolor=\"#e51c23\" colspan=\"2\">Failed test cases Count : $allFailedTestMethods.size(), Failure Reason Based Count : $allFailed.size() </th>" +
@@ -90,23 +98,29 @@ public class ProgressReporter implements ITestListener
     		"</tr>" +
     		"#end" +
     		"</tbody>" +
-    	"</table>";
-	String skippedTable = "<table border=\"2\" cellspacing=\"0\" cellpadding=\"2\" class=\"param\" width=\"50%\">" +
-    		"<tbody>" +
-    		"<tr> " +
-    			"<th bgcolor=\"#ffeb3b\" colspan=\"1\">Skipped test cases Count : $allSkippedTestMethods.size() </th>" +
-    		"</tr>" +
-    		"<tr bgcolor=\"#fff176\">" +
-    			"<th>Skipped Test Cases</th>" +
-    		"</tr>" +
-    		"#foreach( $skip in $allSkippedTestMethods )" +
-    		"<tr>" +
-    			"<td>$skip</td>" +
-    		"</tr>" +
-    		"#end" +
-    		"</tbody>" +
-    	"</table>";
-	String passedTable = "<table border=\"2\" cellspacing=\"0\" cellpadding=\"2\" class=\"param\" width=\"50%\">" +
+    		"</table>" +
+    		"#end";
+	String skippedTable = 
+			"#if ( $allSkippedTestMethods.size() > 0 )" +
+			"<table border=\"2\" cellspacing=\"0\" cellpadding=\"2\" class=\"param\" width=\"50%\">" +
+    			"<tbody>" +
+    				"<tr> " +
+    					"<th bgcolor=\"#ffeb3b\" colspan=\"1\">Skipped test cases Count : $allSkippedTestMethods.size() </th>" +
+    				"</tr>" +
+    				"<tr bgcolor=\"#fff176\">" +
+    					"<th>Skipped Test Cases</th>" +
+    				"</tr>" +
+    				"#foreach( $skip in $allSkippedTestMethods )" +
+    					"<tr>" +
+    						"<td>$skip</td>" +
+    					"</tr>" +
+    				"#end" +
+    			"</tbody>" +
+    		"</table>" + 
+    		"#end";
+	String passedTable =
+			"#if ( $allPassedTestMethods.size() > 0 ) " +
+			"<table border=\"2\" cellspacing=\"0\" cellpadding=\"2\" class=\"param\" width=\"50%\">" +
     		"<tbody>" +
     		"<tr> " +
     			"<th bgcolor=\"#2baf2b\" colspan=\"1\">Passed test cases Count : $allPassedTestMethods.size() </th>" +
@@ -120,7 +134,8 @@ public class ProgressReporter implements ITestListener
     		"</tr>" +
     		"#end" +
     		"</tbody>" +
-    	"</table>";
+    		"</table>" +
+    		"#end";
 	
 	String templateContent = 
 		"<html>" +

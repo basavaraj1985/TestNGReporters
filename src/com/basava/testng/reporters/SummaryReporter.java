@@ -1,4 +1,4 @@
-package com.yahoo.basava.testng.reporters;
+package com.basava.testng.reporters;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
