@@ -136,12 +136,14 @@ public class ProgressReporter implements ITestListener
     		"</tbody>" +
     		"</table>" +
     		"#end";
+	String customMessage = "";
 	
 	String templateContent = 
 		"<html>" +
 			head +
 			"<body>" +
 			"<h1>"+ pageTitle +"</h1>" +
+			"<p>" +customMessage + "</p>" +
     			progressTable + "<br>" +
     			pendingTable + "<br>" +
     			failedTable + "<br>" +
@@ -149,6 +151,9 @@ public class ProgressReporter implements ITestListener
     			passedTable + "<br>" +
     		"</body>" + 
     	"</html>";
+	
+	private long totalActualTimeTaken;
+	private long timeTakenByTestMethods;
 			
 	public ProgressReporter() 
 	{
@@ -215,6 +220,7 @@ public class ProgressReporter implements ITestListener
 	public void onTestSuccess(ITestResult result) 
 	{
 		long timeTaken = result.getEndMillis() - result.getStartMillis();
+		timeTakenByTestMethods += timeTaken ;
 		System.err.println("TestMethod Passed : " + getTestMethodNameFromResult(result) + " time taken : " + timeTaken);
 		allPassedTestMethods.add(getTestMethodNameFromResult(result));
 		progressingTestMethods.remove(getTestMethodNameFromResult(result));
@@ -226,6 +232,7 @@ public class ProgressReporter implements ITestListener
 	public void onTestFailure(ITestResult result) 
 	{
 		long timeTaken = result.getEndMillis() - result.getStartMillis();
+		timeTakenByTestMethods += timeTaken ;
 		System.err.println("TestMethod Passed : " + getTestMethodNameFromResult(result) + " time taken : " + timeTaken);
 		allFailedTestMethods.add(getTestMethodNameFromResult(result));
 		progressingTestMethods.remove(getTestMethodNameFromResult(result));
@@ -253,6 +260,8 @@ public class ProgressReporter implements ITestListener
 	@Override
 	public void onTestFailedButWithinSuccessPercentage(ITestResult result) 
 	{
+		long timeTaken = result.getEndMillis() - result.getStartMillis();
+		timeTakenByTestMethods += timeTaken ;
 		System.err.println("TestMethod failed withing Success% : " + result.getTestClass().getName() + "." +result.getMethod().getMethodName());
 		testsPending.remove(getTestMethodNameFromResult(result));
 		update();
@@ -278,6 +287,11 @@ public class ProgressReporter implements ITestListener
 		System.err.println("TEST finished : " + context.getName() );
 		testsCompleted.add(context.getName());
 		testsInProgress.remove(context.getName());
+		totalActualTimeTaken = context.getEndDate().getTime() - context.getStartDate().getTime();
+		long timeSaved = totalActualTimeTaken - timeTakenByTestMethods ;
+		customMessage = "<span> " + "Sum of time taken for each test method : " + timeTakenByTestMethods/1000 + " seconds!" + "</span>" +
+							"<span> " + "Actual total time taken for run : " + totalActualTimeTaken/1000 + " seconds!" + "</span>" +
+								"<span>" + "Time saved : " + timeSaved/1000 + " seconds OR " + timeSaved*100 / timeTakenByTestMethods + "</span>" ;
 		update();
 	}
 	

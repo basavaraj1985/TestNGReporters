@@ -24,7 +24,7 @@
 		</classes>
 	</test>
 	<listeners>
-		<listener class-name="com.yahoo.basava.testng.reporters.ProgressReporter" />
+		<listener class-name="com.basava.testng.reporters.ProgressReporter" />
 		<!-- <listener class-name="org.testng.reporters.EmailableReporter2" /> -->
 		<listener class-name="org.testng.reporters.EmailableReporter" />
 	</listeners> 
