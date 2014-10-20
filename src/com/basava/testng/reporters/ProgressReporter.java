@@ -38,11 +38,16 @@ public class ProgressReporter implements ITestListener
 	private VelocityContext context ;
 	private Template template =  null;
 	String pageTitle = "Test Progress page";
+	static boolean lastUpdate = true; 
+	String refreshPage = 
+			"#if ($testsPending.size() > 0 || $lastUpdate || $testsInProgress.size() > 0 )" +  
+		    "<meta http-equiv=\"refresh\" content=\"3\" >" + 
+			"#end";
 	String head = "<head>" +
 		     "<title>" + pageTitle + "</title>" +
 		        "<style type=\"text/css\">table caption,table.info_table,table.param,table.passed,table.failed {margin-bottom:10px;border:1px solid #000099;border-collapse:collapse;empty-cells:show;}table.info_table td,table.info_table th,table.param td,table.param th,table.passed td,table.passed th,table.failed td,table.failed th {border:1px solid #000099;padding:.25em .5em .25em .5em}table.param th {vertical-align:bottom}td.numi,th.numi,td.numi_attn {text-align:right}tr.total td {font-weight:bold}table caption {text-align:center;font-weight:bold;}table.passed tr.stripe td,table tr.passedodd td {background-color: #00AA00;}table.passed td,table tr.passedeven td {background-color: #33FF33;}table.passed tr.stripe td,table tr.skippedodd td {background-color: #cccccc;}table.passed td,table tr.skippedodd td {background-color: #dddddd;}table.failed tr.stripe td,table tr.failedodd td,table.param td.numi_attn {background-color: #FF3333;}table.failed td,table tr.failedeven td,table.param tr.stripe td.numi_attn {background-color: #DD0000;}tr.stripe td,tr.stripe th {background-color: #E6EBF9;}p.totop {font-size:85%;text-align:center;border-bottom:2px black solid}div.shootout {padding:2em;border:3px #4854A8 solid} body {background-color:lightpurple}</style>" +
 		        "<link rel=\"stylesheet\" type=\"text/css\" href=\"chrome-extension://lfjamigppmepikjlacjdpgjaiojdjhoj/css/menu.css\">" +
-		        "<meta http-equiv=\"refresh\" content=\"3\" >" +
+		        refreshPage +
 		    "</head>" ; 
 	String progressTable = 
 			"#if ($progressingTestMethods.size() > 0 )" +
@@ -136,14 +141,17 @@ public class ProgressReporter implements ITestListener
     		"</tbody>" +
     		"</table>" +
     		"#end";
-	String customMessage = "";
+	String customMessageBlock = 
+			"$customMessage" ;
+	
+	StringBuffer customMessage = new StringBuffer().append("<span>...in progress...</span>");
 	
 	String templateContent = 
 		"<html>" +
 			head +
 			"<body>" +
 			"<h1>"+ pageTitle +"</h1>" +
-			"<p>" +customMessage + "</p>" +
+			"<p>" +customMessageBlock + "</p>" +
     			progressTable + "<br>" +
     			pendingTable + "<br>" +
     			failedTable + "<br>" +
@@ -159,7 +167,11 @@ public class ProgressReporter implements ITestListener
 	{
 		Properties p = new Properties();
 		p.put("runtime.log", "velocity_example.log");
-		Velocity.init(p);
+		try {
+			Velocity.init(p);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 		
         context = new VelocityContext();
         context.put("testsInProgress", testsInProgress);
@@ -171,6 +183,7 @@ public class ProgressReporter implements ITestListener
         context.put("allFailedTestMethods", allFailedTestMethods);
         context.put("testsCompleted", testsCompleted);
         context.put("testsInProgress", testsInProgress);
+        context.put("customMessage", customMessage);
         
         String dir = PROGRESS_REPORT_FILE.substring(0, PROGRESS_REPORT_FILE.lastIndexOf('/'));
         File file = new File(dir);
@@ -204,7 +217,9 @@ public class ProgressReporter implements ITestListener
         catch( ParseErrorException pee )
         {
             System.out.println("Example : Syntax error in template " + templateFile + ":" + pee );
-        }
+        } catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -287,12 +302,15 @@ public class ProgressReporter implements ITestListener
 		System.err.println("TEST finished : " + context.getName() );
 		testsCompleted.add(context.getName());
 		testsInProgress.remove(context.getName());
+		
 		totalActualTimeTaken = context.getEndDate().getTime() - context.getStartDate().getTime();
-		long timeSaved = totalActualTimeTaken - timeTakenByTestMethods ;
-		customMessage = "<span> " + "Sum of time taken for each test method : " + timeTakenByTestMethods/1000 + " seconds!" + "</span>" +
-							"<span> " + "Actual total time taken for run : " + totalActualTimeTaken/1000 + " seconds!" + "</span>" +
-								"<span>" + "Time saved : " + timeSaved/1000 + " seconds OR " + timeSaved*100 / timeTakenByTestMethods + "</span>" ;
+		long timeSaved = timeTakenByTestMethods - totalActualTimeTaken ;
+		customMessage.replace(0, customMessage.length(), "");
+		customMessage.append(  "<span> " + "Sum of time taken for each test method : " + timeTakenByTestMethods/1000 + " seconds!" + "</span><br/>" +
+							"<span> " + "Actual total time taken for run : " + totalActualTimeTaken/1000 + " seconds!" + "</span><br/>" +
+								"<span>" + "Time saved : " + timeSaved/1000 + " seconds OR " + timeSaved*100 / timeTakenByTestMethods + "%</span>" );
 		update();
+		lastUpdate = false;
 	}
 	
 	private String getTestMethodNameFromResult(ITestResult result)
@@ -334,5 +352,3 @@ public class ProgressReporter implements ITestListener
 		}
 	}
 }
-
-
